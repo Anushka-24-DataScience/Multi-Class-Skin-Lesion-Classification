@@ -1,0 +1,109 @@
+stages:
+  data_ingestion:
+    cmd: set PYTHONPATH=src && python src/DermaCancerScan/pipeline/data_ingestion_01.py
+    deps:
+      - src/DermaCancerScan/pipeline/data_ingestion_01.py
+      - src/DermaCancerScan/components/data_ingestion.py
+      - src/DermaCancerScan/config/configuration.py
+      - config/config.yaml
+    outs:
+      - artifacts/data_ingestion
+#   data_ingestion:
+#     cmd: python src/DermaCancerScan/pipeline/data_ingestion_01.py
+#     deps:
+#       - src/DermaCancerScan/pipeline/data_ingestion_01.py
+#       - src/DermaCancerScan/components/data_ingestion.py
+#       - src/DermaCancerScan/config/configuration.py
+#       - config/config.yaml
+#     outs:
+#       - artifacts/data_ingestion
+
+  # prepare_base_model:
+  #   cmd: python src/DermaCancerScan/pipeline/prepare_base_model_02.py
+  #   deps:
+  #     - src/DermaCancerScan/components/prepare_base_model.py
+  #     - src/DermaCancerScan/pipeline/prepare_base_model_02.py
+  #     - src/DermaCancerScan/config/configuration.py
+  #     - config/config.yaml
+  #     - params.yaml
+  #   params:
+  #     - prepare_base_model.IMAGE_SIZE
+  #     - prepare_base_model.LEARNING_RATE
+  #     - prepare_base_model.INCLUDE_TOP
+  #     - prepare_base_model.WEIGHTS
+  #     - prepare_base_model.CLASSES
+  #   outs:
+  #     - artifacts/prepare_base_model/base_model
+  #     - artifacts/prepare_base_model/base_model_updated
+
+  prepare_base_model:
+    cmd: set PYTHONPATH=src && python -m DermaCancerScan.pipeline.prepare_base_model_02
+    deps:
+      - src/DermaCancerScan/components/prepare_base_model.py
+      - src/DermaCancerScan/pipeline/prepare_base_model_02.py
+      - src/DermaCancerScan/config/configuration.py
+      - config/config.yaml
+      - params.yaml
+    params:
+      - prepare_base_model.IMAGE_SIZE
+      - prepare_base_model.LEARNING_RATE
+      - prepare_base_model.INCLUDE_TOP
+      - prepare_base_model.WEIGHTS
+      - prepare_base_model.CLASSES
+    outs:
+      - artifacts/prepare_base_model/base_model.weights.h5
+      - artifacts/prepare_base_model/base_model_updated.keras
+
+  data_transformation:
+    cmd: set PYTHONPATH=src && python -m DermaCancerScan.pipeline.data_transformation_03
+    deps:
+      - src/DermaCancerScan/pipeline/data_transformation_03.py
+      - src/DermaCancerScan/components/data_transformation.py
+      - src/DermaCancerScan/config/configuration.py
+      - config/config.yaml
+      - params.yaml
+      - artifacts/data_ingestion
+    params:
+      - data_transformation
+    outs:
+      - artifacts/data_transformation/class_indices.json  # concrete file DVC can track
+
+  model_trainer:
+    cmd: set PYTHONPATH=src && python -m DermaCancerScan.pipeline.model_training_04
+    deps:
+      - src/DermaCancerScan/components/model_training.py
+      - src/DermaCancerScan/pipeline/model_training_04.py
+      - src/DermaCancerScan/config/configuration.py
+      - config/config.yaml
+      - params.yaml
+      - artifacts/data_ingestion
+      - artifacts/prepare_base_model/base_model_updated.keras
+      - artifacts/data_transformation/class_indices.json
+    params:
+      - training
+      - callbacks
+    outs:
+      - artifacts/training/trained_model.keras
+      - artifacts/training/callbacks
+
+
+  evaluation:
+    cmd: set PYTHONPATH=src && python -m DermaCancerScan.pipeline.model_evaluation_mlflow_05
+    deps:
+      - src/DermaCancerScan/components/model_evaluation_mlflow.py
+      - src/DermaCancerScan/pipeline/model_evaluation_mlflow_05.py
+      - src/DermaCancerScan/config/configuration.py
+      - config/config.yaml
+      - params.yaml
+      - artifacts/training/trained_model.keras
+      - artifacts/data_ingestion/data/test
+    params:
+      - training
+      - callbacks
+    metrics:
+      - artifacts/evaluation/scores.json:
+          cache: false
+    outs:
+      - artifacts/evaluation/confusion_matrix.png
+
+    

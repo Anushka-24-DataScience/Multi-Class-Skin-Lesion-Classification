@@ -1,0 +1,7 @@
+tensorflow==2.16.1
+flask
+gradio==4.19.2
+pillow
+numpy
+h5py
+

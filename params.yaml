@@ -1,0 +1,28 @@
+prepare_base_model:
+  IMAGE_SIZE: [380, 380, 3]
+  LEARNING_RATE: 0.001
+  INCLUDE_TOP: false
+  WEIGHTS: imagenet
+  CLASSES: 7
+
+data_transformation:
+  IMAGE_SIZE: [380, 380]
+  BATCH_SIZE: 16
+  AUGMENTATION: True
+
+training:
+  EPOCHS: 30
+  BATCH_SIZE: 16
+  AUGMENTATION: True
+  IMAGE_SIZE: [380, 380, 3]
+  LEARNING_RATE: 0.001
+  # Fine-tuning phase params
+  FINE_TUNE_EPOCHS: 20        # Phase 2 epochs
+  FINE_TUNE_LR: 0.00001       # Very low LR for fine-tuning
+  FINE_TUNE_LAYERS: 30        # Number of layers to unfreeze
+
+callbacks:
+  EARLY_STOPPING_PATIENCE: 7
+  REDUCE_LR_PATIENCE: 3
+  REDUCE_LR_FACTOR: 0.3
+  MIN_LR: 0.0000001

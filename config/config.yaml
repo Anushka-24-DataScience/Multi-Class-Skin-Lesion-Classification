@@ -1,0 +1,60 @@
+artifacts_root: artifacts
+
+data_ingestion:
+  root_dir: artifacts/data_ingestion
+  source_URL: https://drive.google.com/file/d/1uV6Mnkv1B1n9oRZ7Y8fmX2st_k__cOVt/view?usp=sharing
+  local_data_file: artifacts/data_ingestion/data.zip
+  unzip_dir: artifacts/data_ingestion
+artifacts_root: artifacts
+
+
+
+# prepare_base_model:
+#   root_dir: artifacts/prepare_base_model
+#   base_model_path: artifacts/prepare_base_model/base_model.keras
+#   updated_base_model_path: artifacts/prepare_base_model/base_model_updated.keras
+#   base_model_name: EfficientNetB4
+
+# prepare_base_model:
+#   root_dir: artifacts/prepare_base_model
+#   base_model_path: artifacts/prepare_base_model/base_model
+#   updated_base_model_path: artifacts/prepare_base_model/base_model_updated
+
+prepare_base_model:
+  root_dir: artifacts/prepare_base_model
+  base_model_path: artifacts/prepare_base_model/base_model
+  updated_base_model_path: artifacts/prepare_base_model/base_model_updated.keras
+
+
+
+data_transformation:
+  root_dir: artifacts/data_transformation
+  train_dir: artifacts/data_ingestion/data/train
+  test_dir: artifacts/data_ingestion/data/test
+
+training:
+  root_dir: artifacts/training
+  updated_base_model_path: artifacts/prepare_base_model/base_model_updated.keras
+  training_data: artifacts/data_ingestion/data/train
+  trained_model_path: artifacts/training/trained_model.keras
+
+
+evaluation:
+  root_dir: artifacts/evaluation
+  # trained_model_path: artifacts/training/trained_model.h5  
+  trained_model_path: artifacts/training/trained_model_local.h5
+  # trained_model_path: artifacts/training/trained_model.keras
+  test_data: artifacts/data_ingestion/data/test
+
+  
+mlflow:
+  tracking_uri: mlruns
+
+ 
+# mlflow:
+#   tracking_uri: http://127.0.0.1:5000
+
+  
+
+
+  

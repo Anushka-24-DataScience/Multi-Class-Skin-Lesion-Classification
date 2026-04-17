@@ -1,0 +1,236 @@
+schema: '2.0'
+stages:
+  prepare_base_model:
+    cmd: set PYTHONPATH=src && python -m 
+      DermaCancerScan.pipeline.prepare_base_model_02
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 1da650cebd73577d03287f2a8d062375
+      size: 1792
+    - path: params.yaml
+      hash: md5
+      md5: dbd1e6a284109a522c48c49b3775fac8
+      size: 655
+    - path: src/DermaCancerScan/components/prepare_base_model.py
+      hash: md5
+      md5: cf20937df57c12a5b819c3165258ad8b
+      size: 3319
+    - path: src/DermaCancerScan/config/configuration.py
+      hash: md5
+      md5: c73b0243a0932c6b7d50e2c300444905
+      size: 6035
+    - path: src/DermaCancerScan/pipeline/prepare_base_model_02.py
+      hash: md5
+      md5: 02ff310c617fe1674dd929828a461414
+      size: 1657
+    params:
+      params.yaml:
+        prepare_base_model.CLASSES: 7
+        prepare_base_model.IMAGE_SIZE:
+        - 380
+        - 380
+        - 3
+        prepare_base_model.INCLUDE_TOP: false
+        prepare_base_model.LEARNING_RATE: 0.001
+        prepare_base_model.WEIGHTS: imagenet
+    outs:
+    - path: artifacts/prepare_base_model/base_model.weights.h5
+      hash: md5
+      md5: 07a7fd9014eb6e23f16e50acc4b87997
+      size: 71896440
+    - path: artifacts/prepare_base_model/base_model_updated.keras
+      hash: md5
+      md5: d7ba71e031cfc004d7c622f278251b87
+      size: 74226061
+  data_ingestion:
+    cmd: set PYTHONPATH=src && python 
+      src/DermaCancerScan/pipeline/data_ingestion_01.py
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 1da650cebd73577d03287f2a8d062375
+      size: 1792
+    - path: src/DermaCancerScan/components/data_ingestion.py
+      hash: md5
+      md5: 6011ca4b7632c40b11b3d568e28415f3
+      size: 1441
+    - path: src/DermaCancerScan/config/configuration.py
+      hash: md5
+      md5: c73b0243a0932c6b7d50e2c300444905
+      size: 6035
+    - path: src/DermaCancerScan/pipeline/data_ingestion_01.py
+      hash: md5
+      md5: 3822282f8a6c2ab69cd1d3bc0642e863
+      size: 914
+    outs:
+    - path: artifacts/data_ingestion
+      hash: md5
+      md5: 5c21119297a00ee4a090950e14b9e5a2.dir
+      size: 4295909995
+      nfiles: 7739
+  data_transformation:
+    cmd: set PYTHONPATH=src && python -m 
+      DermaCancerScan.pipeline.data_transformation_03
+    deps:
+    - path: artifacts/data_ingestion
+      hash: md5
+      md5: 5c21119297a00ee4a090950e14b9e5a2.dir
+      size: 4295909995
+      nfiles: 7739
+    - path: config/config.yaml
+      hash: md5
+      md5: 1da650cebd73577d03287f2a8d062375
+      size: 1792
+    - path: params.yaml
+      hash: md5
+      md5: dbd1e6a284109a522c48c49b3775fac8
+      size: 655
+    - path: src/DermaCancerScan/components/data_transformation.py
+      hash: md5
+      md5: 796c2fc61fbed7971c0edf244c2d8ef0
+      size: 3100
+    - path: src/DermaCancerScan/config/configuration.py
+      hash: md5
+      md5: c73b0243a0932c6b7d50e2c300444905
+      size: 6035
+    - path: src/DermaCancerScan/pipeline/data_transformation_03.py
+      hash: md5
+      md5: 82a90ac40eb7bf89dc98160ce1a525e5
+      size: 1093
+    params:
+      params.yaml:
+        data_transformation:
+          IMAGE_SIZE:
+          - 380
+          - 380
+          BATCH_SIZE: 16
+          AUGMENTATION: true
+    outs:
+    - path: artifacts/data_transformation/class_indices.json
+      hash: md5
+      md5: ced54685ec10351a5e4d2c832e847277
+      size: 109
+  model_trainer:
+    cmd: set PYTHONPATH=src && python -m 
+      DermaCancerScan.pipeline.model_training_04
+    deps:
+    - path: artifacts/data_ingestion
+      hash: md5
+      md5: 5c21119297a00ee4a090950e14b9e5a2.dir
+      size: 4295909995
+      nfiles: 7739
+    - path: artifacts/data_transformation/class_indices.json
+      hash: md5
+      md5: ced54685ec10351a5e4d2c832e847277
+      size: 109
+    - path: artifacts/prepare_base_model/base_model_updated.keras
+      hash: md5
+      md5: d7ba71e031cfc004d7c622f278251b87
+      size: 74226061
+    - path: config/config.yaml
+      hash: md5
+      md5: 1da650cebd73577d03287f2a8d062375
+      size: 1792
+    - path: params.yaml
+      hash: md5
+      md5: dbd1e6a284109a522c48c49b3775fac8
+      size: 655
+    - path: src/DermaCancerScan/components/model_training.py
+      hash: md5
+      md5: 0b364c747261d250d2093e3cddb7b4fc
+      size: 9049
+    - path: src/DermaCancerScan/config/configuration.py
+      hash: md5
+      md5: c73b0243a0932c6b7d50e2c300444905
+      size: 6035
+    - path: src/DermaCancerScan/pipeline/model_training_04.py
+      hash: md5
+      md5: 44b8dacd405d8e37d91d962cd2a3fdb0
+      size: 1563
+    params:
+      params.yaml:
+        callbacks:
+          EARLY_STOPPING_PATIENCE: 7
+          REDUCE_LR_PATIENCE: 3
+          REDUCE_LR_FACTOR: 0.3
+          MIN_LR: 1e-07
+        training:
+          EPOCHS: 30
+          BATCH_SIZE: 16
+          AUGMENTATION: true
+          IMAGE_SIZE:
+          - 380
+          - 380
+          - 3
+          LEARNING_RATE: 0.001
+          FINE_TUNE_EPOCHS: 20
+          FINE_TUNE_LR: 1e-05
+          FINE_TUNE_LAYERS: 30
+    outs:
+    - path: artifacts/training/callbacks
+      hash: md5
+      md5: a6b037b8674bb4ef7fdca81565a76b30.dir
+      size: 130179938
+      nfiles: 5
+    - path: artifacts/training/trained_model.keras
+      hash: md5
+      md5: 7bd0dcc8515bcfa40f331f360a0796c0
+      size: 116299501
+  evaluation:
+    cmd: python src/DermaCancerScan/pipeline/model_evaluation_mlflow_05.py
+    deps:
+    - path: artifacts/data_ingestion/data/test
+      hash: md5
+      md5: 929432c02df268df7a3685cfc217829b.dir
+      size: 489183128
+      nfiles: 1776
+    - path: artifacts/training/trained_model.keras
+      hash: md5
+      md5: 1b51dcc3710c312f2ad855d1d26b17ec
+      size: 77575240
+    - path: config/config.yaml
+      hash: md5
+      md5: 9e9ad4eaf5695ed253dd987b861448df
+      size: 1660
+    - path: params.yaml
+      hash: md5
+      md5: 7fa63c1bc15ce5db4e8247e464a46250
+      size: 495
+    - path: src/DermaCancerScan/components/model_evaluation_mlflow.py
+      hash: md5
+      md5: ff8086e10cbc28919190fbe9a88b2dd7
+      size: 8503
+    - path: src/DermaCancerScan/config/configuration.py
+      hash: md5
+      md5: 494391a3ec2341c3845d60f4f94e560a
+      size: 5823
+    - path: src/DermaCancerScan/pipeline/model_evaluation_mlflow_05.py
+      hash: md5
+      md5: 96aac4ac1150c9307f3d9346ebc9599e
+      size: 1369
+    params:
+      params.yaml:
+        callbacks:
+          EARLY_STOPPING_PATIENCE: 5
+          REDUCE_LR_PATIENCE: 3
+          REDUCE_LR_FACTOR: 0.3
+          MIN_LR: 1e-06
+        training:
+          EPOCHS: 1
+          BATCH_SIZE: 16
+          AUGMENTATION: true
+          IMAGE_SIZE:
+          - 380
+          - 380
+          - 3
+          LEARNING_RATE: 0.001
+    outs:
+    - path: artifacts/evaluation/confusion_matrix.png
+      hash: md5
+      md5: b4e9c19d90101e49360900ce6d4d3064
+      size: 71246
+    - path: artifacts/evaluation/scores.json
+      hash: md5
+      md5: f1cc1b666b96d2f36e16a171b1db5f67
+      size: 459

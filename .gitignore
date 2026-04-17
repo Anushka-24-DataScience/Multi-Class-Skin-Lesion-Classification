@@ -1,0 +1,86 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# =========================
+# ML / DATA SCIENCE
+# =========================
+
+# Datasets
+data/
+dataset/
+datasets/
+*.zip
+*.tar
+*.gz
+*.rar
+
+# Images
+*.jpg
+*.jpeg
+*.png
+*.bmp
+
+# Model files
+*.h5
+*.hdf5
+*.keras
+*.weights.h5
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# ALL pipeline artifacts (DVC regenerates these)
+artifacts/
+
+# Training outputs
+runs/
+outputs/
+logs/
+checkpoints/
+models/
+
+# Cache
+.cache/
+*.cache
+tmp/
+temp/
+tmp_*/
+
+# =========================
+# Frameworks
+# =========================
+.keras/
+.torch/
+.huggingface/
+AppData/
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
