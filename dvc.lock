@@ -10,8 +10,8 @@ stages:
       size: 1792
     - path: params.yaml
       hash: md5
-      md5: dbd1e6a284109a522c48c49b3775fac8
-      size: 655
+      md5: 4d85b32c584d8609ce4ffc1c2c5c1623
+      size: 992
     - path: src/DermaCancerScan/components/prepare_base_model.py
       hash: md5
       md5: cf20937df57c12a5b819c3165258ad8b
@@ -41,7 +41,7 @@ stages:
       size: 71896440
     - path: artifacts/prepare_base_model/base_model_updated.keras
       hash: md5
-      md5: d7ba71e031cfc004d7c622f278251b87
+      md5: 813271104fbc39256bdbe1e5929b0326
       size: 74226061
   data_ingestion:
     cmd: set PYTHONPATH=src && python 
@@ -84,8 +84,8 @@ stages:
       size: 1792
     - path: params.yaml
       hash: md5
-      md5: dbd1e6a284109a522c48c49b3775fac8
-      size: 655
+      md5: 4d85b32c584d8609ce4ffc1c2c5c1623
+      size: 992
     - path: src/DermaCancerScan/components/data_transformation.py
       hash: md5
       md5: 796c2fc61fbed7971c0edf244c2d8ef0
