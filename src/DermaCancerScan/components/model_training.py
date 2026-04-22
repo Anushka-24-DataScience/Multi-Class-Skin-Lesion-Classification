@@ -250,6 +250,12 @@ from DermaCancerScan import logger
 from DermaCancerScan.entity.config_entity import TrainingConfig
 
 
+# ── Detect environment once at import time ──
+# Drive path only exists inside a Colab session with Drive mounted
+_DRIVE_CALLBACKS_DIR = "/content/drive/MyDrive/skin_cancer_models/callbacks"
+_IS_COLAB_WITH_DRIVE = os.path.isdir("/content/drive/MyDrive")
+
+
 class ModelTraining:
     def __init__(self, config: TrainingConfig):
         self.config = config
@@ -345,7 +351,7 @@ class ModelTraining:
                 beta_2=0.999,
                 epsilon=1e-7
             ),
-            # label_smoothing reduced from 0.1 → 0.05
+            # label_smoothing reduced 0.1 → 0.05
             # 0.1 was too aggressive — hurts recall on minority classes
             loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.05),
             metrics=[
@@ -353,7 +359,7 @@ class ModelTraining:
                 tf.keras.metrics.Precision(name="precision"),
                 tf.keras.metrics.Recall(name="recall"),
                 tf.keras.metrics.AUC(name="auc"),
-                tf.keras.metrics.AUC(name="auc_pr", curve="PR")  # PR-AUC: better signal for imbalanced data
+                tf.keras.metrics.AUC(name="auc_pr", curve="PR")  # PR-AUC: better for imbalanced data
             ]
         )
         logger.info(f"Model compiled with LR: {lr}")
@@ -369,26 +375,43 @@ class ModelTraining:
     ):
         os.makedirs(callbacks_dir, exist_ok=True)
 
-        checkpoint_path = str(callbacks_dir / "best_model.keras")
         tensorboard_log_dir = str(callbacks_dir / "tensorboard_logs" / phase)
 
-        # Monitor val_auc instead of val_accuracy —
-        # AUC is more reliable for imbalanced 7-class HAM10000
-        checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
-            filepath=checkpoint_path,
+        # ── Local checkpoint (always runs) ──
+        local_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
+            filepath=str(callbacks_dir / "best_model.keras"),
             monitor="val_auc",
             save_best_only=True,
             mode="max",
             verbose=1
         )
 
+        callbacks = [local_checkpoint_cb]
+
+        # ── Drive checkpoint (Colab only) ──
+        # Skipped on Windows/local — path doesn't exist outside Colab
+        if _IS_COLAB_WITH_DRIVE:
+            os.makedirs(_DRIVE_CALLBACKS_DIR, exist_ok=True)
+            drive_checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
+                filepath=f"{_DRIVE_CALLBACKS_DIR}/best_model_{phase}.keras",
+                monitor="val_auc",
+                save_best_only=True,
+                mode="max",
+                verbose=1
+            )
+            callbacks.append(drive_checkpoint_cb)
+            logger.info(f"Drive backup enabled → {_DRIVE_CALLBACKS_DIR}/best_model_{phase}.keras")
+        else:
+            logger.info("Drive backup skipped — not running on Colab with Drive mounted")
+
+        # ── TensorBoard ──
         tensorboard_cb = tf.keras.callbacks.TensorBoard(
             log_dir=tensorboard_log_dir,
             histogram_freq=1
         )
 
-        # Monitor val_auc for early stopping — directly tracks
-        # the most important metric for HAM10000
+        # ── Early stopping — monitor val_auc ──
+        # val_auc is most reliable for imbalanced 7-class HAM10000
         early_stopping_cb = tf.keras.callbacks.EarlyStopping(
             monitor="val_auc",
             patience=early_stopping_patience,
@@ -397,21 +420,24 @@ class ModelTraining:
             verbose=1
         )
 
-        # Monitor val_loss for LR reduction — loss is still
-        # the right signal for when to reduce LR
+        # ── LR reduction — monitor val_loss ──
+        # val_loss is the right signal for when to reduce LR
+        # factor=0.5, patience=5 — less aggressive than old 0.3/3
+        # min_lr=1e-6 — old 1e-7 floor was killing Phase 2 learning
         reduce_lr_cb = tf.keras.callbacks.ReduceLROnPlateau(
             monitor="val_loss",
-            factor=reduce_lr_factor,   # 0.5 — less aggressive than old 0.3
-            patience=reduce_lr_patience,  # 5 — was 3, dropped LR too fast
-            min_lr=min_lr,             # 1e-6 — was 1e-7, was killing Phase 2
+            factor=reduce_lr_factor,
+            patience=reduce_lr_patience,
+            min_lr=min_lr,
             verbose=1
         )
 
-        return [checkpoint_cb, tensorboard_cb, early_stopping_cb, reduce_lr_cb]
+        callbacks.extend([tensorboard_cb, early_stopping_cb, reduce_lr_cb])
+        return callbacks
 
     def _unfreeze_top_layers(self):
         """Unfreeze last N layers of EfficientNetB4 for fine-tuning.
-        
+
         FINE_TUNE_LAYERS=80 recommended (was 30).
         EfficientNetB4 has ~475 layers — unfreezing only 30 (~6%)
         was too conservative for domain adaptation to skin lesions.
@@ -449,6 +475,7 @@ class ModelTraining:
         logger.info(f"Phase 1: Training custom head — {self.config.params_epochs} epochs")
         logger.info(f"All EfficientNetB4 layers frozen")
         logger.info(f"LR: {self.config.params_learning_rate}")
+        logger.info(f"Drive backup: {'enabled' if _IS_COLAB_WITH_DRIVE else 'disabled (local run)'}")
         logger.info("=" * 50)
 
         phase1_callbacks = self._prepare_callbacks(
@@ -475,13 +502,13 @@ class ModelTraining:
         # ── Phase 2: Fine-tune last N layers ──
         logger.info("=" * 50)
         logger.info(f"Phase 2: Fine-tuning last {self.config.params_fine_tune_layers} layers")
-        logger.info(f"Fine-tune LR : {self.config.params_fine_tune_lr}")
+        logger.info(f"Fine-tune LR    : {self.config.params_fine_tune_lr}")
         logger.info(f"Fine-tune epochs: {self.config.params_fine_tune_epochs}")
         logger.info("=" * 50)
 
         self._unfreeze_top_layers()
 
-        # Recompile with fine-tune LR (3e-5 recommended — was 1e-5, too low)
+        # Recompile with fine-tune LR (3e-5 — 10x lower than head LR)
         self.compile_model(learning_rate=self.config.params_fine_tune_lr)
 
         phase2_callbacks = self._prepare_callbacks(
@@ -505,8 +532,14 @@ class ModelTraining:
         )
         logger.info("Phase 2 fine-tuning complete.")
 
-        # Save final trained model
+        # ── Save final trained model ──
         self.save_model(
             path=self.config.trained_model_path,
             model=self.model
         )
+
+        # ── Final Drive backup (Colab only) ──
+        if _IS_COLAB_WITH_DRIVE:
+            final_drive_path = "/content/drive/MyDrive/skin_cancer_models/trained_model.keras"
+            self.save_model(path=Path(final_drive_path), model=self.model)
+            logger.info(f"Final model also saved to Drive: {final_drive_path}")
