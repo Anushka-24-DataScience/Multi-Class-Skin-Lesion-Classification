@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/admin/Desktop/Skin_Cancer_Classification/mlruns/0/b64e16d18b414a11a45eae8dc14aa4bd/artifacts
+end_time: 1776972025285
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: b64e16d18b414a11a45eae8dc14aa4bd
+run_name: judicious-mule-606
+run_uuid: b64e16d18b414a11a45eae8dc14aa4bd
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1776972022253
+status: 3
+tags: []
+user_id: admin

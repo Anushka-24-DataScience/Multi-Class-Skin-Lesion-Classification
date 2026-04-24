@@ -32,7 +32,7 @@ class SkinCancerPredictor:
 
     def __init__(
         self,
-        model_path: str = "artifacts/training/trained_model_local.h5",  # ← use this
+        model_path: str = "artifacts/training/trained_model.keras",  # ← use this
         class_indices_path: str = "artifacts/data_transformation/class_indices.json"
     ):
         self.model = tf.keras.models.load_model(model_path, compile=False)

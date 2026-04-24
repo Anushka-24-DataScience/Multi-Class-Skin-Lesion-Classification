@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/admin/Desktop/Skin_Cancer_Classification/mlruns/0/4c3576722cb8417fad48a3ab3e99ecb5/artifacts
+end_time: 1776967394695
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 4c3576722cb8417fad48a3ab3e99ecb5
+run_name: sneaky-ape-706
+run_uuid: 4c3576722cb8417fad48a3ab3e99ecb5
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1776967394302
+status: 4
+tags: []
+user_id: admin

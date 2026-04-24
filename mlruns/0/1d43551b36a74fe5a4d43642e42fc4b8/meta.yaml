@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/admin/Desktop/Skin_Cancer_Classification/mlruns/0/1d43551b36a74fe5a4d43642e42fc4b8/artifacts
+end_time: 1776969076528
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 1d43551b36a74fe5a4d43642e42fc4b8
+run_name: traveling-mouse-347
+run_uuid: 1d43551b36a74fe5a4d43642e42fc4b8
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1776969076027
+status: 4
+tags: []
+user_id: admin

@@ -42,8 +42,8 @@ training:
 evaluation:
   root_dir: artifacts/evaluation
   # trained_model_path: artifacts/training/trained_model.h5  
-  trained_model_path: artifacts/training/trained_model_local.h5
-  # trained_model_path: artifacts/training/trained_model.keras
+  # trained_model_path: artifacts/training/trained_model_local.h5
+  trained_model_path: artifacts/training/trained_model.keras
   test_data: artifacts/data_ingestion/data/test
 
   

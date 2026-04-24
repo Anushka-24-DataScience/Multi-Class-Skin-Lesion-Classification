@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/admin/Desktop/Skin_Cancer_Classification/mlruns/0/99331dd115ac4a909bf278102c104ac1/artifacts
+end_time: 1776965399167
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 99331dd115ac4a909bf278102c104ac1
+run_name: masked-dog-468
+run_uuid: 99331dd115ac4a909bf278102c104ac1
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1776965398601
+status: 4
+tags: []
+user_id: admin
