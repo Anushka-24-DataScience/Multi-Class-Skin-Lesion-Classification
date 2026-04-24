@@ -8,3 +8,9 @@ h5py
 gunicorn
 
 
+# tensorflow==2.12.0
+# gradio==3.50.2
+# huggingface_hub==0.20.3
+# pillow
+# numpy
+# h5py
