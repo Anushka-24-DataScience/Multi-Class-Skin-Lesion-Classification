@@ -131,7 +131,7 @@
 # if __name__ == "__main__":
 #     demo.launch(server_name="0.0.0.0", server_port=7860)
 
-# import gradio as gr
+import gradio as gr
 import numpy as np
 import tensorflow as tf
 import json
