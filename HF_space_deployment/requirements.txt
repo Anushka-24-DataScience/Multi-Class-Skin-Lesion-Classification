@@ -1,11 +1,13 @@
 tensorflow==2.16.1
 keras==3.12.1
-gradio==3.50.2
-huggingface_hub==0.20.3
+gradio==4.44.1
+huggingface_hub==0.24.0
 pillow
 numpy
 h5py
 gunicorn
+
+
 
 
 # tensorflow==2.12.0

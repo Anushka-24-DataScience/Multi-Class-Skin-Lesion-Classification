@@ -251,4 +251,9 @@ with gr.Blocks(title="DermaCancerScan", theme=gr.themes.Soft()) as demo:
         outputs=[out_condition, out_risk, out_confidence, out_rec, out_probs]
     )
 
-demo.launch(server_name="0.0.0.0", server_port=7860)
+demo.launch(
+    server_name="0.0.0.0",
+    server_port=7860,
+    share=False,
+    show_error=True
+)
