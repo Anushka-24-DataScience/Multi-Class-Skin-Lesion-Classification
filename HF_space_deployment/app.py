@@ -7,7 +7,7 @@ import tempfile
 import os
 
 # ── Load model once at startup ──
-MODEL_PATH = "artifacts/training/trained_model.keras"
+MODEL_PATH = "artifacts/training/trained_model.h5"
 CLASS_INDICES_PATH = "artifacts/data_transformation/class_indices.json"
 
 print("Loading model...")

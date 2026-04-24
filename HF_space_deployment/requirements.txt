@@ -1,7 +1,8 @@
-tensorflow==2.12.0 
-flask 
-pillow 
-numpy 
-h5py 
-python-dotenv 
-gunicorn 
+tensorflow==2.16.1
+keras==3.12.1
+gradio==3.50.2
+huggingface_hub==0.20.3
+pillow
+numpy
+h5py
+gunicorn
