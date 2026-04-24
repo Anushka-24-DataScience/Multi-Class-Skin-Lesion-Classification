@@ -1,7 +1,7 @@
 tensorflow==2.16.1
 keras==3.3.3
 gradio==5.29.0
-huggingface_hub==0.24.0
+huggingface_hub>=0.28.1
 pillow
 numpy
 h5py
