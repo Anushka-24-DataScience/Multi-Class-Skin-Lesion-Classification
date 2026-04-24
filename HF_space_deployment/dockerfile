@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
     libhdf5-dev \
-    libgl1 \
+    libgl1-mesa-glx \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
@@ -17,4 +17,4 @@ RUN mkdir -p uploads
 
 EXPOSE 7860
 
-CMD ["python", "app.py"]                     
+CMD ["python", "app.py"]                  

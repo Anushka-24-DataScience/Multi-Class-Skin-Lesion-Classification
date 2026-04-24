@@ -7,7 +7,7 @@ import tempfile
 import os
 
 # ── Load model once at startup ──
-MODEL_PATH = "artifacts/training/trained_model_local.h5"
+MODEL_PATH = "artifacts/training/trained_model.keras"
 CLASS_INDICES_PATH = "artifacts/data_transformation/class_indices.json"
 
 print("Loading model...")
@@ -127,4 +127,6 @@ with gr.Blocks(title="DermaCancerScan") as demo:
     - **Pipeline**: DVC + MLflow for experiment tracking
     """)
 
-demo.launch()
+# demo.launch()
+if __name__ == "__main__":
+    demo.launch(server_name="0.0.0.0", server_port=7860)
