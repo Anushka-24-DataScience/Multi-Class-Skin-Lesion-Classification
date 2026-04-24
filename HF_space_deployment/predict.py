@@ -38,7 +38,8 @@ RECOMMENDATION = {
 class SkinCancerPredictor:
     def __init__(
         self,
-        model_path: str = "artifacts/training/trained_model_local.h5",
+        # ✅ Use the .h5 file that actually exists on HF
+        model_path: str = "artifacts/training/trained_model_hf.h5",
         class_indices_path: str = "artifacts/data_transformation/class_indices.json"
     ):
         print(f"Loading model from: {model_path}")

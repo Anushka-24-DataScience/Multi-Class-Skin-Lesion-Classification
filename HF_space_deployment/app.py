@@ -131,41 +131,21 @@
 # if __name__ == "__main__":
 #     demo.launch(server_name="0.0.0.0", server_port=7860)
 
-import gradio as gr
+# import gradio as gr
 import numpy as np
 import tensorflow as tf
 import json
 from PIL import Image
+import threading
 
-# ── Rebuild model architecture and load weights ──
-# This bypasses ALL Keras version compatibility issues
-def build_model():
-    base = tf.keras.applications.EfficientNetB4(
-        input_shape=(380, 380, 3),
-        weights=None,
-        include_top=False
-    )
-    x = tf.keras.layers.GlobalAveragePooling2D()(base.output)
-    x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.Dropout(0.4)(x)
-    x = tf.keras.layers.Dense(256, activation="relu")(x)
-    x = tf.keras.layers.Dropout(0.3)(x)
-    output = tf.keras.layers.Dense(7, activation="softmax")(x)
-    return tf.keras.models.Model(inputs=base.input, outputs=output)
+# ── Global model placeholder ──
+model = None
+model_lock = threading.Lock()
+model_loaded = False
+model_error = None
 
 WEIGHTS_PATH = "artifacts/training/trained_weights.weights.h5"
 CLASS_INDICES_PATH = "artifacts/data_transformation/class_indices.json"
-
-print("Building model architecture...")
-model = build_model()
-print("Loading weights...")
-model.load_weights(WEIGHTS_PATH)
-print("✅ Model ready")
-
-with open(CLASS_INDICES_PATH) as f:
-    class_indices = json.load(f)
-
-idx_to_class = {v: k for k, v in class_indices.items()}
 
 CLASS_INFO = {
     "akiec": "Actinic Keratoses",
@@ -198,17 +178,66 @@ RECOMMENDATION = {
 }
 
 
+def build_model():
+    base = tf.keras.applications.EfficientNetB4(
+        input_shape=(380, 380, 3),
+        weights=None,
+        include_top=False
+    )
+    x = tf.keras.layers.GlobalAveragePooling2D()(base.output)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.Dropout(0.4)(x)
+    x = tf.keras.layers.Dense(256, activation="relu")(x)
+    x = tf.keras.layers.Dropout(0.3)(x)
+    output = tf.keras.layers.Dense(7, activation="softmax")(x)
+    return tf.keras.models.Model(inputs=base.input, outputs=output)
+
+
+def load_model_background():
+    """Load model in background thread so Gradio starts immediately"""
+    global model, model_loaded, model_error
+    try:
+        print("🔄 Building model architecture in background...")
+        m = build_model()
+        print("🔄 Loading weights in background...")
+        m.load_weights(WEIGHTS_PATH)
+        with model_lock:
+            model = m
+            model_loaded = True
+        print("✅ Model ready in background!")
+    except Exception as e:
+        model_error = str(e)
+        print(f"❌ Model load failed: {e}")
+
+
+# ── Load class indices ──
+with open(CLASS_INDICES_PATH) as f:
+    class_indices = json.load(f)
+idx_to_class = {v: k for k, v in class_indices.items()}
+
+# ── Start model loading in background thread ──
+threading.Thread(target=load_model_background, daemon=True).start()
+
+
 def predict(image):
     if image is None:
-        return "No image", "", "", "", {}
+        return "No image uploaded", "", "", "", {}
+
+    # Model still loading
+    if not model_loaded:
+        if model_error:
+            return f"❌ Model error: {model_error}", "", "", "", {}
+        return "⏳ Model is still loading, please wait 1-2 minutes and try again...", "", "", "", {}
 
     img = Image.fromarray(image).convert("RGB")
     img = img.resize((380, 380))
     arr = np.array(img, dtype=np.float32)
     arr = np.expand_dims(arr, axis=0)
 
-    probs = model.predict(arr, verbose=0)[0]
-    pred_idx = int(np.argmax(probs))
+    with model_lock:
+        probs = model.predict(arr, verbose=0)[0]
+
+    pred_idx   = int(np.argmax(probs))
     pred_class = idx_to_class[pred_idx]
     confidence = float(probs[pred_idx]) * 100
 
@@ -226,6 +255,7 @@ def predict(image):
     )
 
 
+# ── Gradio UI ──
 with gr.Blocks(title="DermaCancerScan", theme=gr.themes.Soft()) as demo:
     gr.Markdown("""
     # 🔬 DermaCancerScan
@@ -250,11 +280,6 @@ with gr.Blocks(title="DermaCancerScan", theme=gr.themes.Soft()) as demo:
         inputs=image_input,
         outputs=[out_condition, out_risk, out_confidence, out_rec, out_probs]
     )
-demo.launch()     
 
-# demo.launch(
-#     server_name="0.0.0.0",
-#     server_port=7860,
-#     share=False,
-#     show_error=True
-# )
+# ── Launch IMMEDIATELY — model loads in background ──
+demo.launch(server_name="0.0.0.0", server_port=7860)
